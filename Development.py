@@ -1,42 +1,5 @@
-# # This code tests to see if you can define a class as an input to another class.
-#
-#
-# class Student:
-#     def __init__(self, name, age, grade):
-#         self.name = name
-#         self.age = age
-#         self.grade = grade
-#
-#         def get_grade(self):
-#             return self.grade
-#
-#
-# class Course:
-#     def __init__(self, name, max_students):
-#         self.name = name
-#         self.max_students = max_students
-#         self.students = []
-#
-#     def add_student(self, student):
-#         if len(self.students) < self.max_students:
-#             self.students.append(student)
-#             return True
-#         return False
-#
-#     def get_average_grade(self):
-#         value = 0
-#         for student in self.students:
-#             value += student.get_grade()
-#
-#         return value / len(self.students)
-#
-# MechENG = Course('Mechanical Engineering', 7)
-# MechENG.add_student(Student('Emanuel', 24, '2:1'))
-# print(MechENG.students[0].name)
-
-#######################################################################################################################
-
-# This code tests if it is best to store the arrays of positions in each instance or in the class in general
+# 2021/06/23
+# This code tests: specifically defining 'the process' as a function that you can call in an if statement.
 
 from stockfish import Stockfish
 
@@ -85,24 +48,7 @@ class Position(Stockfish):
                 self.SF()  # will this make the code loop successfully when a user tries to change from S to M
                 pass
 
-        # This is code in this function that was working on [2021/06/19]
 
-        # self.position_number = input("What position number to start?")
-        # if int(self.position_number) < len(Position.tactics_list_in_Position):
-        #     self.set_fen_position(Position.tactics_list_in_Position[int(self.position_number)])
-        #     # Doesn't yet do anything with the chosen position.
-        #     self.is_SF = True
-        #     self.bm()
-        #     self.position_number_end = input("What position number to end?")
-        #     if int(self.position_number_end) < len(Position.tactics_list_in_Position) & int(self.position_number_end) > int(self.position_number):
-        #
-        #         pass
-        #     # Also needs an option for just the single position - otherwise needs to cycle to the chosen number unless
-        #     # the end number is too high. Either cycle to highest possible number or ask for new number.
-        # elif int(self.position_number) >= len(Position.tactics_list_in_Position):
-        #     print("Position value not found.")
-        #     self.is_SF = False
-        #     return
 
     def bm(self):
         if self.is_SF:  # if it is true then it check ' == True' anyway, same with False
