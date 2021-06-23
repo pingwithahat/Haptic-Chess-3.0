@@ -1,5 +1,5 @@
 # 2021/06/23
-# This code tests: specifically defining 'the process' as a function that you can call in an if statement.
+# This code tests: specifically defining 'the process' as a function that you can call in a while or an if statement.
 
 from stockfish import Stockfish
 
