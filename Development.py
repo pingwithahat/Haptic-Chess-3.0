@@ -31,7 +31,7 @@ class Position(Stockfish):
         cls.number_of_positions += 1
 
     def SF(self):
-        while Position.quit:
+        while Position.quit:  # just removing the while loop didn't solve the 'cycling problem' (2021-06-23)
             user_input = input("What position type? Single-position analysis [S] or Multi-position analysis [M]?")
             # if user_input == 'Quit' or 'quit' or 'Q' or 'q':
             #     Position.quit = 0
@@ -76,19 +76,6 @@ class Position(Stockfish):
                     # code will go here to prepare for move to be transmitted over BLE to Buzz
                     # how to check if user input is a valid move?
                     # input("Please enter your move:")
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     def bm(self):
         if self.is_SF:  # if it is true then it check ' == True' anyway, same with False
