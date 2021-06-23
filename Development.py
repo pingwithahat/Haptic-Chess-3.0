@@ -7,6 +7,8 @@ from stockfish import Stockfish
 class Position(Stockfish):
     number_of_positions = 0
 
+    quit = 1
+
     tactics_list_in_Position = [
         "4r1k1/p4p2/1r4pp/2pQ2q1/1P4n1/2P3P1/P1B2PP1/1R1R2K1 b - - 0 0",
         # The best move for this FEN is e8e1.
@@ -29,24 +31,62 @@ class Position(Stockfish):
         cls.number_of_positions += 1
 
     def SF(self):
-        user_input = input("What position type? Single position analysis [S] or Multi-position analysis [M]?")
-        if user_input == 'S' or 's':
-            user_input = input("Please enter position number you would like:    ['M' for Multi-position analysis]")
-            if int(user_input) >= 0 & int(user_input) <= Position.number_of_positions:
-                self.set_fen_position(Position.tactics_list_in_Position[int(user_input)])
-                self.bm()
-                print(self.get_board_visual())
-                # code will go here to prepare for move to be transmitted over BLE to Buzz
-                # how to check if user input is a valid move?
-                # input("Please enter your move:")
-            if int(user_input) < 0 | int(user_input) > Position.number_of_positions:
-                # have code here that loops back to asking what position number you would like and a prompt to choose a
-                # higher number or a lower number, respectfully
-                pass
+        while Position.quit:
+            user_input = input("What position type? Single-position analysis [S] or Multi-position analysis [M]?")
+            # if user_input == 'Quit' or 'quit' or 'Q' or 'q':
+            #     Position.quit = 0
+            # elif user_input == 'S' or 's':
+            if user_input == 'S' or 's':
+                user_input = input("Please enter position number you would like:    ['M' for Multi-position analysis]")
+                if user_input == 'M' or 'm' or 'cancel' or 'Cancel':
+                    self.SF()  # will this make the code loop successfully when a user tries to change from S to M
+                    pass
 
-            elif user_input == 'M':
-                self.SF()  # will this make the code loop successfully when a user tries to change from S to M
-                pass
+                elif user_input == 'Quit' or 'quit' or 'Q' or 'q':
+                    Position.quit = 0
+
+                elif int(float(user_input)) >= 0 & int(
+                        float(user_input)) <= Position.number_of_positions:  # so the input
+                    # needs to be first passed through the float conversion, before the int conversion, or it will throw
+                    # up an error: "ValueError: invalid literal for int() with base 10: 'M'"
+                    self.set_fen_position(Position.tactics_list_in_Position[int(float(user_input))])
+                    self.bm()
+                    print(self.get_board_visual())
+                    # code will go here to prepare for move to be transmitted over BLE to Buzz
+                    # how to check if user input is a valid move?
+                    # input("Please enter your move:")
+                elif int(user_input) < 0 | int(user_input) > Position.number_of_positions:
+                    # have code here that loops back to asking what position number you would like and a prompt to choose a
+                    # higher number or a lower number, respectfully
+                    pass
+
+            elif user_input == 'M' or 'm':
+                user_input = input(
+                    "Please enter the first position to cycle through: [insert range option 0-??]  ['S' for"
+                    "Single-position analysis]")
+                if user_input == 'S' or 's':
+                    self.SF()
+                elif int(float(user_input)) >= 0 & int(
+                        float(user_input)) <= Position.number_of_positions:  # so the input
+                    # needs to be first passed through the float conversion, before the int conversion, or it will throw
+                    # up an error: "ValueError: invalid literal for int() with base 10: 'M'"
+                    self.set_fen_position(Position.tactics_list_in_Position[int(float(user_input))])
+                    self.bm()
+                    print(self.get_board_visual())
+                    # code will go here to prepare for move to be transmitted over BLE to Buzz
+                    # how to check if user input is a valid move?
+                    # input("Please enter your move:")
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -61,34 +101,3 @@ iop = Position()
 print(iop.SF())
 # iop.bm()
 
-
-# Working but could run into trouble with '.is_SF()' needing to be 'True' for '.bm()' to work.
-# Below will manually input instances of each 'Position' class in a list to be called upon (e.g. to find the best move).
-
-# array_of_instances = []
-#
-# array_of_instances2 = []
-#
-# array_of_instances.append(Position("",0))
-# array_of_instances.append(Position("",1))
-# array_of_instances.append(Position("",2))
-#
-# print(array_of_instances)
-# for instances in array_of_instances:
-#     instances.bm()
-
-
-#
-# array_of_instances[0].set_fen_position(Position.tactics_list_in_Position[0])
-# print(array_of_instances[0].get_best_move())
-
-
-# Will print the FEN positions and the 'best move' of each position in 'Position.tactics_list_in_Position'.
-# for positions in Position.tactics_list_in_Position:
-#     iop.set_fen_position(positions)
-#     print(positions)
-#     iop.bm()
-#     array_of_instances2.append(Position(positions))
-
-# print(array_of_instances2)
-# This will save an instance of each 'Position' class which can be called upon in the list 'array_of_instances2'.
