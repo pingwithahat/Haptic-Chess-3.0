@@ -30,53 +30,6 @@ class Position(Stockfish):
     def add_to_number_of_positions(cls):
         cls.number_of_positions += 1
 
-    def SF(self):
-        while Position.quit:  # just removing the while loop didn't solve the 'cycling problem' (2021-06-23)
-            user_input = input("What position type? Single-position analysis [S] or Multi-position analysis [M]?")
-            # if user_input == 'Quit' or 'quit' or 'Q' or 'q':
-            #     Position.quit = 0
-            # elif user_input == 'S' or 's':
-            if user_input == 'S' or 's':
-                user_input = input("Please enter position number you would like:    ['M' for Multi-position analysis]")
-                if user_input == 'M' or 'm' or 'cancel' or 'Cancel':
-                    self.SF()  # will this make the code loop successfully when a user tries to change from S to M
-                    pass
-
-                elif user_input == 'Quit' or 'quit' or 'Q' or 'q':
-                    Position.quit = 0
-
-                elif int(float(user_input)) >= 0 & int(
-                        float(user_input)) <= Position.number_of_positions:  # so the input
-                    # needs to be first passed through the float conversion, before the int conversion, or it will throw
-                    # up an error: "ValueError: invalid literal for int() with base 10: 'M'"
-                    self.set_fen_position(Position.tactics_list_in_Position[int(float(user_input))])
-                    self.bm()
-                    print(self.get_board_visual())
-                    # code will go here to prepare for move to be transmitted over BLE to Buzz
-                    # how to check if user input is a valid move?
-                    # input("Please enter your move:")
-                elif int(user_input) < 0 | int(user_input) > Position.number_of_positions:
-                    # have code here that loops back to asking what position number you would like and a prompt to choose a
-                    # higher number or a lower number, respectfully
-                    pass
-
-            elif user_input == 'M' or 'm':
-                user_input = input(
-                    "Please enter the first position to cycle through: [insert range option 0-??]  ['S' for"
-                    "Single-position analysis]")
-                if user_input == 'S' or 's':
-                    self.SF()
-                elif int(float(user_input)) >= 0 & int(
-                        float(user_input)) <= Position.number_of_positions:  # so the input
-                    # needs to be first passed through the float conversion, before the int conversion, or it will throw
-                    # up an error: "ValueError: invalid literal for int() with base 10: 'M'"
-                    self.set_fen_position(Position.tactics_list_in_Position[int(float(user_input))])
-                    self.bm()
-                    print(self.get_board_visual())
-                    # code will go here to prepare for move to be transmitted over BLE to Buzz
-                    # how to check if user input is a valid move?
-                    # input("Please enter your move:")
-
     def bm(self):
         if self.is_SF:  # if it is true then it check ' == True' anyway, same with False
             print(self.get_best_move())
@@ -84,7 +37,78 @@ class Position(Stockfish):
             return
 
 
-iop = Position()
-print(iop.SF())
-# iop.bm()
+    def load_position(self):
+        self.name = Position.tactics_list_in_Position[int(float(input('position to load')))]
+        self.set_fen_position(self.name)
+        self.bm()
+        print(self.get_board_visual())
 
+    def set_mode(self, name: str = "S"):
+        pass
+
+
+    # def SF(self):
+    #     try:
+    #         while Position.quit:  # just removing the while loop didn't solve the 'cycling problem' (2021-06-23)
+    #             user_input = input("What position type? Single-position analysis [S] or Multi-position analysis [M]?")
+    #             # if user_input == 'Quit' or 'quit' or 'Q' or 'q':
+    #             #     Position.quit = 0
+    #     # break
+    #             # elif user_input == 'S' or 's':
+    #             # print(type(user_input))  # used to show that user_input is type <class 'str'>
+    #             if user_input == 'S' or 's':
+    #                 user_input = input(
+    #                     "Please enter position number you would like:    ['M' for Multi-position analysis]")
+    #                 if user_input == 'M' or 'm' or 'cancel' or 'Cancel':
+    #                     self.SF()  # will this make the code loop successfully when a user tries to change from S to M
+    #                     pass
+    #
+    #                 elif user_input == 'Quit' or 'quit' or 'Q' or 'q':
+    #                     Position.quit = 0
+    #                     break
+    #
+    #
+    #                 elif int(float(user_input)) >= 0 & int(
+    #                         float(user_input)) <= Position.number_of_positions:  # so the input
+    #                     # needs to be first passed through the float conversion, before the int conversion, or it will throw
+    #                     # up an error: "ValueError: invalid literal for int() with base 10: 'M'"
+    #                     self.set_fen_position(Position.tactics_list_in_Position[int(float(user_input))])
+    #                     self.bm()
+    #                     print(self.get_board_visual())
+    #                     # code will go here to prepare for move to be transmitted over BLE to Buzz
+    #                     # how to check if user input is a valid move?
+    #                     # input("Please enter your move:")
+    #                 elif int(user_input) < 0 | int(user_input) > Position.number_of_positions:
+    #                     # have code here that loops back to asking what position number you would like and a prompt to choose a
+    #                     # higher number or a lower number, respectfully
+    #                     pass
+    #
+    #             elif user_input == 'M' or 'm':
+    #                 user_input = input(
+    #                     "Please enter the first position to cycle through: [insert range option 0-??]  ['S' for"
+    #                     "Single-position analysis]")
+    #                 if user_input == 'S' or 's':
+    #                     self.SF()
+    #                 elif int(float(user_input)) >= 0 & int(
+    #                         float(user_input)) <= Position.number_of_positions:  # so the input
+    #                     # needs to be first passed through the float conversion, before the int conversion, or it will throw
+    #                     # up an error: "ValueError: invalid literal for int() with base 10: 'M'"
+    #                     self.set_fen_position(Position.tactics_list_in_Position[int(float(user_input))])
+    #                     self.bm()
+    #                     print(self.get_board_visual())
+    #                     # code will go here to prepare for move to be transmitted over BLE to Buzz
+    #                     # how to check if user input is a valid move?
+    #                     # input("Please enter your move:")
+    #
+    #             else:
+    #                 print('Unclear input; please start again. Thank you')
+    #                 self.SF()  # catch to send back to beginning
+    #
+    #     except:
+    #         print('Something went wrong.')
+
+
+
+
+iop = Position()
+iop.load_position()
