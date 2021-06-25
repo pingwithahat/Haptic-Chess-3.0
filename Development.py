@@ -43,8 +43,21 @@ class Position(Stockfish):
         self.bm()
         print(self.get_board_visual())
 
-    def set_mode(self, name: str = "S"):
-        pass
+    def set_mode_to_S(self, name: str = "S"):
+        self.name = name
+        user_input = input('Mode set to [S]')
+        if user_input == "M":
+            self.set_mode_to_M()
+        else:
+            pass
+
+    def set_mode_to_M(self, name: str = "M"):
+        self.name = name
+        user_input = input('Mode set to [M]')
+        if user_input == "S":
+            self.set_mode_to_S()
+        else:
+            pass
 
 
     # def SF(self):
