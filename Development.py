@@ -19,6 +19,8 @@ class Position(Stockfish):
         "6k1/4p1b1/5p2/2q1pP1Q/8/7R/6PP/2r2R1K w - - 0 0"  # h5e8
     ]
 
+    # number_of_potential_positions = len(tactics_list_in_Position)
+
     def __init__(self, name: str = "", index: int = 0, path: str = 'stockfish_13_win_x64_bmi2.exe', depth: int = 26,
                  parameters: dict = None):
         super().__init__(path, depth, parameters)
@@ -36,9 +38,23 @@ class Position(Stockfish):
         else:
             return
 
+    def display_score(self):
+        score_location = self.info.index("score")  # This will find the assigned
+        score_end = self.info.index("nodes")
+        score = self.info[score_location:score_end]
+        print(score)
+
+    def display_pv(self):
+        # i need to find a way to isolate the 'pv' information
+
+        pv_string_location = self.info.index(" pv ")
+        pure_pv = self.info[pv_string_location:]
+        pure_pv = pure_pv.replace(" pv ", "")
+        print('PV: ' + pure_pv)
+
 
     def load_position(self):
-        self.name = Position.tactics_list_in_Position[int(float(input('position to load')))]
+        self.name = Position.tactics_list_in_Position[int(float(input('position to load:    ')))]
         self.set_fen_position(self.name)
         self.bm()
         print(self.get_board_visual())
@@ -121,7 +137,11 @@ class Position(Stockfish):
     #         print('Something went wrong.')
 
 
+#######################################################################################################################
 
+# [2021/06/25]
 
 iop = Position()
 iop.load_position()
+print(len(Position.tactics_list_in_Position))
+print(iop.name)
