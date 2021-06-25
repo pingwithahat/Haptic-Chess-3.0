@@ -26,6 +26,7 @@ class Position(Stockfish):
         super().__init__(path, depth, parameters)
         self.name = name
         self.is_SF = True  # will show best move by default if just '.bm' is called
+        self.current_mode = ""
         Position.add_to_number_of_positions()
 
     @classmethod
@@ -60,7 +61,7 @@ class Position(Stockfish):
         print(self.get_board_visual())
 
     def set_mode_to_S(self, name: str = "S"):
-        self.name = name
+        self.current_mode = name
         user_input = input('Mode set to [S]')
         if user_input == "M":
             self.set_mode_to_M()
@@ -68,7 +69,7 @@ class Position(Stockfish):
             pass
 
     def set_mode_to_M(self, name: str = "M"):
-        self.name = name
+        self.current_mode = name
         user_input = input('Mode set to [M]')
         if user_input == "S":
             self.set_mode_to_S()
@@ -145,3 +146,6 @@ iop = Position()
 iop.load_position()
 print(len(Position.tactics_list_in_Position))
 print(iop.name)
+iop.display_score()
+iop.display_pv()
+
