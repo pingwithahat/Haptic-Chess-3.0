@@ -100,7 +100,7 @@ class Position(Stockfish):
                 self.load_position()
             else:
                 print('Wrong move')
-                # code to send move to buzz
+                # code to send best move to buzz
                 self.request_user_move()
         except:
             pass
