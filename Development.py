@@ -26,8 +26,8 @@ class Position(Stockfish):
         super().__init__(path, depth, parameters)
         self.name = name
         self.is_SF = True  # will show best move by default if just '.bm' is called
-        self.current_mode = ""
-        Position.add_to_number_of_positions()
+        self.current_mode = "S"
+        Position.add_to_number_of_positions()  # is this needed?
 
     @classmethod
     def add_to_number_of_positions(cls):
@@ -54,11 +54,57 @@ class Position(Stockfish):
         print('PV: ' + pure_pv)
 
 
+    # def load_position(self):  # might be more correct to use 'try except' as I am expecting the user to be correct most
+    #     # of the time
+    #     user_input = input('Position to load:    ')
+    #     if 0 <= int(float(user_input)) < len(Position.tactics_list_in_Position):
+    #         self.name = Position.tactics_list_in_Position[int(float(user_input))]
+    #         self.set_fen_position(self.name)
+    #         print(self.get_board_visual())
+    #     elif int(float(user_input)) < 0 or int(float(user_input)) >= len(Position.tactics_list_in_Position):
+    #         print('Invalid user input')
+    #         self.load_position()
+    #     elif ValueError:  # this doesn't work at catching the ValueError: could not convert string to float
+    #         print('Invalid user input')
+
+
     def load_position(self):
-        self.name = Position.tactics_list_in_Position[int(float(input('position to load:    ')))]
-        self.set_fen_position(self.name)
-        self.bm()
-        print(self.get_board_visual())
+        try:
+            if self.current_mode == 'S':
+                user_input = input('Position to load:    ')
+                if 0 <= int(float(user_input)) < len(Position.tactics_list_in_Position):
+                    self.name = Position.tactics_list_in_Position[int(float(user_input))]
+                    self.set_fen_position(self.name)
+                    print(self.name)
+                    print(self.get_board_visual())
+                    # code to send signal to buzz
+                    self.request_user_move()
+                elif int(float(user_input)) < 0 or int(float(user_input)) >= len(Position.tactics_list_in_Position):
+                    print('Invalid user input')
+                    self.load_position()
+            elif self.current_mode == 'M':
+                print('multi-position learning not available at this time (i.e. not needed for Stage I)')
+                # code will go here for selecting a start and end position, making sure that no invalid input is given
+                pass
+        except ValueError:
+            print('Invalid user input')
+            self.load_position()
+
+
+    def request_user_move(self):
+        try:
+            user_best_move = input('Best move:     ')
+            if self.is_move_correct(user_best_move):
+                print('Correct move!')
+                self.make_moves_from_current_position([user_best_move])
+                self.load_position()
+            else:
+                print('Wrong move')
+                # code to send move to buzz
+                self.request_user_move()
+        except:
+            pass
+
 
     def set_mode_to_S(self, name: str = "S"):
         self.current_mode = name
@@ -144,8 +190,22 @@ class Position(Stockfish):
 
 iop = Position()
 iop.load_position()
-print(len(Position.tactics_list_in_Position))
-print(iop.name)
-iop.display_score()
-iop.display_pv()
+# print(len(Position.tactics_list_in_Position))
+# print(iop.name)
+# iop.display_score()
+# iop.display_pv()
+
+# [2021/07/01]
+
+# if I say 'user_input = input('test')' and then say 'if user_input >= 0: pass' will it re-prompt the user for input?
+# Yes. Running the code below, the input 'test' is only printed once.
+
+# user_input = input('test')
+# if int(float(user_input)) > 10:
+#     print("it's bigger than 10")
+# elif user_input == "fuck":
+#     pass
+# elif int(float(user_input)) > 20:
+#     print("it's bigger than 20")
+
 
