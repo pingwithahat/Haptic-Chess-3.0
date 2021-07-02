@@ -28,7 +28,7 @@ class Position(Stockfish):
         self.is_SF = True  # will show best move by default if just '.bm' is called
         self.current_mode = "S"
         Position.add_to_number_of_positions()  # is this needed?
-        # self.load_position()
+        self.load_position()
 
     @classmethod
     def add_to_number_of_positions(cls):
@@ -79,6 +79,9 @@ class Position(Stockfish):
                     print(self.name)
                     print(self.get_board_visual())
                     # code to send signal to buzz
+
+
+
                     self.request_user_move()
                 elif int(float(user_input)) < 0 or int(float(user_input)) >= len(Position.tactics_list_in_Position):
                     print('Invalid user input')
@@ -190,7 +193,6 @@ class Position(Stockfish):
 # [2021/06/25]
 
 iop = Position()
-iop.set_mode_to_M()
 iop.load_position()
 # print(len(Position.tactics_list_in_Position))
 # print(iop.name)

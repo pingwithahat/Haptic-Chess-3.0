@@ -1,11 +1,13 @@
-import asyncio, io, base64, time, board, busio, requests
+import asyncio, io, base64, time, board, requests
 import numpy as np
-import adafruit_mlx90640
+
 import matplotlib.pyplot as plt
 from PIL import Image
 from bleak import BleakClient
 from bleak import discover
 from neosensory_python import NeoDevice
+
+from stockfish import Stockfish
 
 
 def notification_handler(sender, data):
@@ -46,84 +48,73 @@ async def run(loop):
         sweep_right = [0, 0, 0, 255, 0, 0, 255, 0, 0, 255, 0, 0, 255, 0, 0, 0, 0, 0, 0, 0]
         sweep_centre = [255, 0, 0, 0, 0, 255, 0, 0, 0, 0, 0, 255, 0, 0, 255, 0, 0, 0, 0, 0]
 
-        i2c = busio.I2C(board.SCL, board.SDA, frequency=1000000)  # setup I2C
-        mlx = adafruit_mlx90640.MLX90640(i2c)  # begin MLX90640 with I2C comm
-        mlx.refresh_rate = adafruit_mlx90640.RefreshRate.REFRESH_2_HZ  # set refresh rate
-
-        frame = [0] * 768  # setup array for storing all 768 temperatures
-
         try:
             while True:
                 try:
-                    # start = time.time()
-                    mlx.getFrame(frame)  # read MLX temperatures into frame var
-                    # print("data from frame " +str(time.time() - start), end='')
 
-                    mlx_shape = (24, 32)
-                    fig = plt.figure(frameon=False)
+                    def load_position(self):
+                        try:
+                            if self.current_mode == 'S':
+                                user_input = input('Position to load:    ')
+                                if 0 <= int(float(user_input)) < len(Position.tactics_list_in_Position):
+                                    self.name = Position.tactics_list_in_Position[int(float(user_input))]
+                                    self.set_fen_position(self.name)
+                                    print(self.name)
+                                    print(self.get_board_visual())
+                                    # code to send signal to buzz
+                                    self.request_user_move()
+                                elif int(float(user_input)) < 0 or int(float(user_input)) >= len(
+                                        Position.tactics_list_in_Position):
+                                    print('Invalid user input')
+                                    self.load_position()
+                            elif self.current_mode == 'M':
+                                print(
+                                    'multi-position learning not available at this time (i.e. not needed for Stage I)')
+                                # code will go here for selecting a start and end position, making sure that no invalid input is given
+                                pass
+                        except ValueError:
+                            print('Invalid user input')
+                            self.load_position()
 
-                    ax = plt.Axes(fig, [0., 0., 1., 1.])
-                    ax.set_axis_off()
-                    fig.add_axes(ax)
-
-                    thermal_image = ax.imshow(np.zeros(mlx_shape), aspect='auto')
-
-                    MIN = 18.67
-                    MAX = 43.68
-
-                    data_array = (np.reshape(frame, mlx_shape))  # reshape to 24x32
-                    thermal_image.set_data(np.fliplr(data_array))  # flip left to right
-                    thermal_image.set_clim(vmin=MIN, vmax=MAX)  # set bounds
-
-                    # print("img as fig " +str(time.time() - start), end='')
-
-                    buf = io.BytesIO()
-                    fig.savefig(buf, format='jpg', facecolor='#FCFCFC', bbox_inches='tight')  # comment out to speed up
-                    img_b64 = base64.b64encode(buf.getvalue()).decode()
-                    # end = time.time()
-
-                    buf.close()
-                    plt.close(fig)
-                    # print(" Total Elapsed: " + str(end-start))
-                    # start_request = time.time()
-                    response = requests.post(url="http://92.21.72.35:5001/classify-image",
-                                             data={"image": img_b64, "frame": frame})
-                    print(response.json())
-                    response = response.json()
-
-                    if (response['hasPerson'] == True):
-                        print("has person")
-                        if (response['direction']):
-
-                            print(response['direction'])
-
-                            if response['direction'] == 3:
-                                await my_buzz.vibrate_motors(sweep_left)
-                                print("Left")
-
-                            elif response['direction'] == 2:
-                                await my_buzz.vibrate_motors(sweep_centre)
-                                print("Centre")
-
-                            elif response['direction'] == 1:
-                                await my_buzz.vibrate_motors(sweep_right)
-                                print("Right")
-
+                    def request_user_move(self):
+                        try:
+                            user_best_move = input('Best move:     ')
+                            if self.is_move_correct(user_best_move):
+                                print('Correct move!')
+                                self.make_moves_from_current_position([user_best_move])
+                                self.load_position()
                             else:
-                                print("inconclusive")
-                    else:
-                        print("no person")
+                                print('Wrong move')
+                                # code to send best move to buzz
+                                self.request_user_move()
+                        except:
+                            pass
+
+
+
+
+
+                    iop = Position()
+                    iop.load_position
+
+
+                except:
+                    pass
+
+
+
+
+
 
                     # end_request=time.time()
                     # print("total request time: " + str(end_request - start_request))
 
-                except ValueError:
-                    continue  # if error, just read again
-
             print("still buzzing")
 
-        except KeyboardInterrupt:
-            await my_buzz.resume_device_algorithm()
+        # except KeyboardInterrupt:
+        #     await my_buzz.resume_device_algorithm()
+        #     pass
+        except:
             pass
 
 
@@ -131,3 +122,114 @@ if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     loop.run_until_complete(run(loop))
 
+#####
+
+# This section of code is taken from Development on 2021/07/02
+
+class Position(Stockfish):
+    number_of_positions = 0
+
+    quit = 1
+
+    tactics_list_in_Position = [
+        "4r1k1/p4p2/1r4pp/2pQ2q1/1P4n1/2P3P1/P1B2PP1/1R1R2K1 b - - 0 0",
+        # The best move for this FEN is e8e1.
+        "2r2rk1/pp3ppp/3p4/5Q2/2BP4/1N2q3/PP4PP/2R4K w - - 0 0",
+        # The best move for this FEN is c4f7.
+        "r3nrk1/p1pq1pbp/3p4/2p1P1N1/5Pb1/1P6/PBP1Q1N1/4RRK1 w - - 0 0",  # Qe4Bf5
+        "r3kb1r/1pqb1ppp/p1p1p3/2PpP3/N3Pn2/2QB1N2/PP3PPP/R4RK1 b - - 0 0",  # dxc4 Bc4
+        "6k1/4p1b1/5p2/2q1pP1Q/8/7R/6PP/2r2R1K w - - 0 0"  # h5e8
+    ]
+
+    # number_of_potential_positions = len(tactics_list_in_Position)
+
+    def __init__(self, name: str = "", index: int = 0, path: str = 'stockfish_13_win_x64_bmi2.exe', depth: int = 26,
+                 parameters: dict = None):
+        super().__init__(path, depth, parameters)
+        self.name = name
+        self.is_SF = True  # will show best move by default if just '.bm' is called
+        self.current_mode = "S"
+        Position.add_to_number_of_positions()  # is this needed?
+        # self.load_position()
+
+    @classmethod
+    def add_to_number_of_positions(cls):
+        cls.number_of_positions += 1
+
+    def bm(self):
+        if self.is_SF:  # if it is true then it check ' == True' anyway, same with False
+            print(self.get_best_move())
+        else:
+            return
+
+    def display_score(self):
+        score_location = self.info.index("score")  # This will find the assigned
+        score_end = self.info.index("nodes")
+        score = self.info[score_location:score_end]
+        print(score)
+
+    def display_pv(self):
+        # i need to find a way to isolate the 'pv' information
+
+        pv_string_location = self.info.index(" pv ")
+        pure_pv = self.info[pv_string_location:]
+        pure_pv = pure_pv.replace(" pv ", "")
+        print('PV: ' + pure_pv)
+
+
+    # def load_position(self):
+    #     try:
+    #         if self.current_mode == 'S':
+    #             user_input = input('Position to load:    ')
+    #             if 0 <= int(float(user_input)) < len(Position.tactics_list_in_Position):
+    #                 self.name = Position.tactics_list_in_Position[int(float(user_input))]
+    #                 self.set_fen_position(self.name)
+    #                 print(self.name)
+    #                 print(self.get_board_visual())
+    #                 # code to send signal to buzz
+    #
+    #                 self.request_user_move()
+    #             elif int(float(user_input)) < 0 or int(float(user_input)) >= len(Position.tactics_list_in_Position):
+    #                 print('Invalid user input')
+    #                 self.load_position()
+    #         elif self.current_mode == 'M':
+    #             print('multi-position learning not available at this time (i.e. not needed for Stage I)')
+    #             # code will go here for selecting a start and end position, making sure that no invalid input is given
+    #             pass
+    #     except ValueError:
+    #         print('Invalid user input')
+    #         self.load_position()
+
+    # def request_user_move(self):
+    #     try:
+    #         user_best_move = input('Best move:     ')
+    #         if self.is_move_correct(user_best_move):
+    #             print('Correct move!')
+    #             self.make_moves_from_current_position([user_best_move])
+    #             self.load_position()
+    #         else:
+    #             print('Wrong move')
+    #             # code to send best move to buzz
+    #             self.request_user_move()
+    #     except:
+    #         pass
+
+    def set_mode_to_S(self, name: str = "S"):
+        self.current_mode = name
+        user_input = input('Mode set to [S]')
+        if user_input == "M":
+            self.set_mode_to_M()
+        else:
+            pass
+
+    def set_mode_to_M(self, name: str = "M"):
+        self.current_mode = name
+        user_input = input('Mode set to [M]')
+        if user_input == "S":
+            self.set_mode_to_S()
+        else:
+            pass
+
+
+
+#####
